@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <windows.h>
 
 using namespace std;
 
@@ -20,7 +21,7 @@ struct Libro {
     string autor;
     int anio;
     string categoria;
-    int cantidad;
+    int ejemplares;
 };
 
 // Datos de estudiantes
@@ -45,13 +46,19 @@ void buscarPrestamo();          // Integrante 5
 
 
 int main() {
+    // Configurar la consola para mostrar tildes y letra ñ
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
 
     do {
 
         mostrarMenu();
 
-        cout << "Seleccione una opcion: ";
+        cout << "Seleccione una opción (1-6): ";
         cin >> opcion;
+
+        cin.clear();
+        cin.ignore(1000, '\n');
 
         switch (opcion) {
 
@@ -72,84 +79,101 @@ int main() {
                 break;
 
             case 5:
-                cout << "Saliendo del sistema...\n";
+                buscarPrestamo();
+                break;
+
+            case 6:
+                cout << "\n[INFO] Saliendo del sistema...\n";
                 break;
 
             default:
-                cout << "Opcion no valida.\n";
+                cout << "\n[ERROR] Opción no válida.\n";
         }
-    } while (opcion != 5);
+    } while (opcion != 6);
     return 0;
 }
 
 
 void mostrarMenu() {
-    cout << "\n--- SISTEMA DE BIBLIOTECA ---\n";
+    cout << "\n========================================";
+    cout << "\n    SISTEMA DE GESTIÓN BIBLIOTECARIA    ";
+    cout << "\n========================================\n";
     cout << "1. Registrar libros\n";
     cout << "2. Registrar estudiantes\n";
     cout << "3. Consultar libros\n";
     cout << "4. Consultar estudiantes\n";
-    cout << "5. Salir\n";
+    cout << "5. Buscar préstamo\n";
+    cout << "6. Salir";
+    cout << "\n========================================\n";
 }
 
 
 
 void registrarLibro() {
-    if (libros.size() >= 100) {
-        cout << "\n[ERROR] Limite de capacidad alcanzado (maximo 100 libros).\n";
-        return;
-    }
-
+    cout << "\n=== REGISTRO DE NUEVO LIBRO ===\n";
     Libro nuevoLibro;
 
-    cout << "\n--- REGISTRO DE LIBRO (" << libros.size() + 1 << "/100) ---\n";
+    do {
+        cout << "Ingrese el código del libro: ";
+        getline(cin, nuevoLibro.codigo);
 
-    cout << "Codigo del libro: ";
-    cin >> nuevoLibro.codigo;
-    cin.ignore();
+        if (nuevoLibro.codigo.empty()) {
+            cout << "[ERROR] El código no puede estar vacío.\n";
+        }
+    } while (nuevoLibro.codigo.empty());
 
     do {
-        cout << "Titulo: ";
+        cout << "Ingrese el título: ";
         getline(cin, nuevoLibro.titulo);
+
         if (nuevoLibro.titulo.empty()) {
-            cout << "[ERROR] El titulo no puede estar vacio.\n";
+            cout << "[ERROR] El título no puede estar vacío.\n";
         }
     } while (nuevoLibro.titulo.empty());
 
     do {
-        cout << "Autor: ";
+        cout << "Ingrese el autor: ";
         getline(cin, nuevoLibro.autor);
+
         if (nuevoLibro.autor.empty()) {
-            cout << "[ERROR] El autor no puede estar vacio.\n";
+            cout << "[ERROR] El autor no puede estar vacío.\n";
         }
     } while (nuevoLibro.autor.empty());
 
-    cout << "Año de publicacion: ";
-    while (!(cin >> nuevoLibro.anio) || nuevoLibro.anio <= 0 || nuevoLibro.anio > anioActual) {
-        cout << "[ERROR] Ingrese un año valido (entre 1 y " << anioActual << "): ";
+    do {
+        cout << "Ingrese el año de publicación: ";
+        cin >> nuevoLibro.anio;
         cin.clear();
-        cin.ignore();
-    }
-    cin.ignore();
+        cin.ignore(1000, '\n');
+
+        if (nuevoLibro.anio <= 0 || nuevoLibro.anio > anioActual) {
+            cout << "[ERROR] Ingrese un año válido (entre 1 y " << anioActual << ").\n";
+        }
+    } while (nuevoLibro.anio <= 0 || nuevoLibro.anio > anioActual);
 
     do {
-        cout << "Categoria: ";
-        getline(cin, nuevoLibro.categoria);
+        cout << "Ingresa la categoría: ";
+        getline(cin, nuevoLibro.categoria); // CAMBIAR: Debe ser un menú de opciones predefinidas (Ficción, No Ficción, Ciencia, Historia, etc.)
+
         if (nuevoLibro.categoria.empty()) {
-            cout << "[ERROR] La categoria no puede estar vacia.\n";
+            cout << "[ERROR] La categoria no puede estar vacía.\n";
         }
     } while (nuevoLibro.categoria.empty());
 
-    cout << "Cantidad disponible: ";
-    while (!(cin >> nuevoLibro.cantidad) || nuevoLibro.cantidad <= 0) {
-        cout << "[ERROR] Debe ingresar un numero entero mayor a 0.\n";
+    do {
+        cout << "Ingrese la cantidad de ejemplares: ";
+        cin >> nuevoLibro.ejemplares;
         cin.clear();
-        cin.ignore();
-    }
+        cin.ignore(1000, '\n');
+
+        if (nuevoLibro.ejemplares <= 0) {
+            cout << "[ERROR] La cantidad debe ser mayor a cero.\n";
+        }
+    } while (nuevoLibro.ejemplares <= 0);
 
     libros.push_back(nuevoLibro);
 
-    cout << "\n¡Libro registrado exitosamente!\n";
+    cout << "\n[INFO] ¡Libro registrado exitosamente!\n";
 }
 
 
