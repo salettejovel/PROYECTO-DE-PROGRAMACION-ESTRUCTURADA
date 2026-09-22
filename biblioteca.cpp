@@ -12,7 +12,7 @@ int totalLibros = 0;
 int totalEstudiantes = 0;
 int anioActual = 2026;
 
-// Datos de libros con variables nativas (arreglos paralelos, sin structs)
+// Datos de libros
 vector<string> libroCodigo;
 vector<string> libroTitulo;
 vector<string> libroAutor;
@@ -20,7 +20,7 @@ vector<int> libroAnio;
 vector<string> libroCategoria;
 vector<int> libroEjemplares;
 
-// Datos de estudiantes con variables nativas (arreglos paralelos, sin structs)
+// Datos de estudiantes
 vector<string> estudianteNombre;
 vector<string> estudianteApellidos;
 vector<string> estudianteCarnet;
@@ -92,6 +92,7 @@ void registrarLibro() {
     int anio = 0;
     int ejemplares = 0;
 
+    // Registrar datos del libro con validaciones
     do {
         cout << "Ingrese el código del libro: ";
         getline(cin, codigo);
@@ -167,6 +168,7 @@ void registrarLibro() {
         }
     } while (ejemplares <= 0);
 
+    // Guardar los datos del libro
     libroCodigo.push_back(codigo);
     libroTitulo.push_back(titulo);
     libroAutor.push_back(autor);
@@ -210,7 +212,7 @@ void registrarEstudiante() {
         }
     } while (carnet.empty());
 
-    // Guardar en los vectores paralelos
+    // Guardar los datos del estudiante
     estudianteNombre.push_back(nombre);
     estudianteApellidos.push_back(apellidos);
     estudianteCarnet.push_back(carnet);
@@ -220,44 +222,101 @@ void registrarEstudiante() {
 }
 
 void consultarLibros() {
-    if (totalLibros == 0) {
-        cout << "\n[INFO] No hay libros registrados.\n";
-        return;
-    }
-    
-    cout << "\n=== CONSULTA DE LIBROS REGISTRADOS ===\n";
-    cout << "----------------------------------------\n";
-    for (size_t i = 0; i < totalLibros; ++i) {
-        cout << "[Libro #" << (i + 1) << "]\n";
-        cout << "Código:     " << libroCodigo[i] << "\n";
-        cout << "Título:     " << libroTitulo[i] << "\n";
-        cout << "Autor:      " << libroAutor[i] << "\n";
-        cout << "Año:        " << libroAnio[i] << "\n";
-        cout << "Categoría:  " << libroCategoria[i] << "\n";
-        cout << "Ejemplares: " << libroEjemplares[i] << "\n";
+    if (totalLibros > 0) {
+        cout << "\n=== CONSULTA DE LIBROS REGISTRADOS ===\n";
         cout << "----------------------------------------\n";
+        for (int i = 0; i < totalLibros; ++i) {
+            cout << "[Libro #" << (i + 1) << "]\n";
+            cout << "Código:     " << libroCodigo[i] << "\n";
+            cout << "Título:     " << libroTitulo[i] << "\n";
+            cout << "Autor:      " << libroAutor[i] << "\n";
+            cout << "Año:        " << libroAnio[i] << "\n";
+            cout << "Categoría:  " << libroCategoria[i] << "\n";
+            cout << "Ejemplares: " << libroEjemplares[i] << "\n";
+            cout << "----------------------------------------\n";
+        } 
+    } else {
+        cout << "\n[INFO] No hay libros registrados.\n";
     }
 }
 
 void consultarEstudiantes() {
-    if (totalEstudiantes == 0) {
-        cout << "\n[INFO] No hay estudiantes registrados.\n";
-        return;
-    }
-    
-    cout << "\n=== CONSULTA DE ESTUDIANTES REGISTRADOS ===\n";
-    cout << "------------------------------------------\n";
-    for (size_t i = 0; i < totalEstudiantes; ++i) {
-        cout << "[Estudiante #" << (i + 1) << "]\n";
-        cout << "Nombres:    " << estudianteNombre[i] << "\n";
-        cout << "Apellidos:  " << estudianteApellidos[i] << "\n";
-        cout << "Carnet:     " << estudianteCarnet[i] << "\n";
+    if (totalEstudiantes > 0) {
+        cout << "\n=== CONSULTA DE ESTUDIANTES REGISTRADOS ===\n";
         cout << "------------------------------------------\n";
+        for (int i = 0; i < totalEstudiantes; ++i) {
+            cout << "[Estudiante #" << (i + 1) << "]\n";
+            cout << "Nombres:    " << estudianteNombre[i] << "\n";
+            cout << "Apellidos:  " << estudianteApellidos[i] << "\n";
+            cout << "Carnet:     " << estudianteCarnet[i] << "\n";
+            cout << "------------------------------------------\n";
+        }
+    } else {
+        cout << "\n[INFO] No hay estudiantes registrados.\n";
     }
 }
 
 void buscarPrestamo() {
-    // Buscar estudiante por carne
-    // Buscar libro por codigo
-    // Mostrar resultados
+    if (totalEstudiantes == 0 || totalLibros == 0) {
+        cout << "\n[INFO] No hay estudiantes o libros registrados para realizar la búsqueda.\n";
+        return;
+    }
+    
+    cout << "\n=== BÚSQUEDA DE PRÉSTAMO ===\n";
+    string carnetBusqueda, codigoBusqueda;
+
+    do{
+        cout << "Ingrese el carnet del estudiante: ";
+        getline(cin, carnetBusqueda);
+
+        if (carnetBusqueda.empty()) {
+            cout << "[ERROR] El carnet no puede estar vacío.\n";
+        }
+    } while (carnetBusqueda.empty());
+
+    do{
+        cout << "Ingrese el código del libro: ";
+        getline(cin, codigoBusqueda);
+
+        if (codigoBusqueda.empty()) {
+            cout << "[ERROR] El código no puede estar vacío.\n";
+        }
+    } while (codigoBusqueda.empty());
+
+    // Buscar índice del estudiante por carnet
+    int indiceEstudiante = -1;
+    for (int i = 0; i < totalEstudiantes; ++i) {
+        if (estudianteCarnet[i] == carnetBusqueda) {
+            indiceEstudiante = i;
+            break; // Se encontró, no hace falta seguir buscando
+        }
+    }
+
+    // Buscar índice del libro por código
+    int indiceLibro = -1;
+    for (int i = 0; i < totalLibros; ++i) {
+        if (libroCodigo[i] == codigoBusqueda) {
+            indiceLibro = i;
+            break;
+        }
+    }
+
+    if(indiceEstudiante == -1 || indiceLibro == -1) {
+        cout << "\n[INFO] No se encontró el préstamo con los datos proporcionados.\n";
+    } else {
+        cout << "\n-----------------------------------------\n";
+        cout << "Estudiante encontrado: \n";
+        cout << "Nombres: " << estudianteNombre[indiceEstudiante] << "\n";
+        cout << "Apellidos: " << estudianteApellidos[indiceEstudiante] << "\n";
+        cout << "Carnet:     " << estudianteCarnet[indiceEstudiante];
+        cout << "\n-----------------------------------------\n";
+        cout << "Libro encontrado: \n";
+        cout << "Título:     " << libroTitulo[indiceLibro] << "\n";
+        cout << "Código:     " << libroCodigo[indiceLibro] << "\n";
+        cout << "Autor:      " << libroAutor[indiceLibro] << "\n";
+        cout << "Año:        " << libroAnio[indiceLibro] << "\n";
+        cout << "Categoría:  " << libroCategoria[indiceLibro] << "\n";
+        cout << "Ejemplares: " << libroEjemplares[indiceLibro];
+        cout << "\n-----------------------------------------\n";
+    }
 }
