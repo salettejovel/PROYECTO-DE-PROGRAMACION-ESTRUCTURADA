@@ -32,7 +32,7 @@ void modificarLibro();
 void eliminarLibro();
 void modificarEstudiante();
 void eliminarEstudiante();
-void agregarStock(); // NUEVO: Prototipo para la gestión de stock
+void agregarStock(); 
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
@@ -103,7 +103,7 @@ void mostrarMenu() {
     cout << "7. Modificar estudiante\n";
     cout << "8. Eliminar estudiante\n";
     cout << "9. Buscar préstamo\n";
-    cout << "10. Agregar Stock a un Libro\n"; // NUEVA OPCIÓN
+    cout << "10. Agregar Stock a un Libro\n"; 
     cout << "11. Salir";
     cout << "\n========================================\n";
 }
@@ -720,9 +720,7 @@ void buscarPrestamo() {
     system("cls");
 }
 
-// ==========================================
-// NUEVA FUNCIÓN: GESTIÓN DE STOCK
-// ==========================================
+
 void agregarStock() {
     if (totalLibros == 0) {
         cout << "\n[INFO] No hay libros registrados para gestionar stock.\n";
@@ -738,7 +736,7 @@ void agregarStock() {
     getline(cin, codigoBusqueda);
 
     int indice = -1;
-    // Buscar el libro por su código
+   
     for (int i = 0; i < totalLibros; ++i) {
         if (libroCodigo[i] == codigoBusqueda) {
             indice = i;
@@ -746,7 +744,7 @@ void agregarStock() {
         }
     }
 
-    // Validar si el libro existe
+   
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
         system("pause");
@@ -757,7 +755,7 @@ void agregarStock() {
         cout << "\nLibro encontrado: " << libroTitulo[indice] << "\n";
         cout << "Stock actual: " << libroEjemplares[indice] << " ejemplares.\n";
 
-        // Pedir y validar la cantidad de ejemplares a sumar
+        
         do {
             cout << "\nIngrese la cantidad de libros nuevos a agregar al stock: ";
             cin >> nuevosEjemplares;
@@ -772,7 +770,7 @@ void agregarStock() {
             }
         } while (nuevosEjemplares <= 0);
 
-        // Sumar los nuevos ejemplares al vector correspondiente
+        
         libroEjemplares[indice] += nuevosEjemplares;
 
         cout << "\n[INFO] ¡Stock actualizado exitosamente!\n";
