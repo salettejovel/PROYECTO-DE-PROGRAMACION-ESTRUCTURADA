@@ -22,12 +22,17 @@ vector<string> estudianteNombre;
 vector<string> estudianteApellidos;
 vector<string> estudianteCarnet;
 
+int totalPrestamos = 0;
+vector<string> prestamoCarnet;
+vector<string> prestamoCodigo;
+
 void mostrarMenu();
 void registrarLibro();
 void registrarEstudiante();
 void consultarLibros();
 void consultarEstudiantes();
-void buscarPrestamo();
+void realizarPrestamo();
+void devolverLibro();
 void modificarLibro();
 void eliminarLibro();
 void modificarEstudiante();
@@ -41,7 +46,7 @@ int main() {
     do {
         mostrarMenu();
 
-        cout << "Seleccione una opción (1-11): ";
+        cout << "Seleccione una opción (1-12): ";
         cin >> opcion;
 
         cin.clear();
@@ -73,12 +78,15 @@ int main() {
                 eliminarEstudiante();
                 break;
             case 9:
-                buscarPrestamo();
+                realizarPrestamo();
                 break;
             case 10:
-                agregarStock(); // NUEVO: Llamada a la función de stock
+                devolverLibro();
                 break;
             case 11:
+                agregarStock(); // NUEVO: Llamada a la función de stock
+                break;
+            case 12:
                 cout << "\n[INFO] Saliendo del sistema...\n";
                 break;
             default:
@@ -86,7 +94,7 @@ int main() {
                 system("pause");
                 system("cls");
         }
-    } while (opcion != 11); // Modificado para salir con 11
+    } while (opcion != 12); // Modificado para salir con 12
     return 0;
 }
 
@@ -102,9 +110,10 @@ void mostrarMenu() {
     cout << "6. Eliminar libro\n";
     cout << "7. Modificar estudiante\n";
     cout << "8. Eliminar estudiante\n";
-    cout << "9. Buscar préstamo\n";
-    cout << "10. Agregar Stock a un Libro\n"; 
-    cout << "11. Salir";
+    cout << "9. Registrar préstamo\n";
+    cout << "10. Devolver libro\n";
+    cout << "11. Agregar Stock a un Libro\n"; 
+    cout << "12. Salir";
     cout << "\n========================================\n";
 }
 
@@ -362,7 +371,7 @@ void modificarLibro() {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
         system("pause");
         system("cls");
-        goto inicioModificarLibro;
+        return;
     } else {
         cout << "\n--- Ingrese los nuevos datos del libro ---\n";
 
@@ -452,7 +461,6 @@ void eliminarLibro() {
         return;
     }
 
-    inicioEliminarLibro:
     string codigoBusqueda;
     cout << "\n=== ELIMINAR LIBRO ===\n";
     cout << "Ingrese el código del libro a eliminar: ";
@@ -470,7 +478,7 @@ void eliminarLibro() {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
         system("pause");
         system("cls");
-        goto inicioEliminarLibro;
+        return;
     } else {
         libroCodigo.erase(libroCodigo.begin() + indice);
         libroTitulo.erase(libroTitulo.begin() + indice);
@@ -513,7 +521,7 @@ void modificarEstudiante() {
         cout << "\n[ERROR] No se encontró ningún estudiante con el carnet proporcionado.\n";
         system("pause");
         system("cls");
-        goto inicioModificarEstudiante;
+        return;
     } else {
         cout << "\n--- Ingrese los nuevos datos del estudiante ---\n";
 
@@ -554,7 +562,6 @@ void eliminarEstudiante() {
         return;
     }
 
-    inicioEliminarEstudiante:
     string carnetBusqueda;
     cout << "\n=== ELIMINAR ESTUDIANTE ===\n";
     cout << "Ingrese el carnet del estudiante a eliminar: ";
@@ -572,7 +579,7 @@ void eliminarEstudiante() {
         cout << "\n[ERROR] No se encontró ningún estudiante con el carnet proporcionado.\n";
         system("pause");
         system("cls");
-        goto inicioEliminarEstudiante;
+        return;
     } else {
         estudianteNombre.erase(estudianteNombre.begin() + indice);
         estudianteApellidos.erase(estudianteApellidos.begin() + indice);
@@ -586,16 +593,16 @@ void eliminarEstudiante() {
     system("cls");
 }
 
-void buscarPrestamo() {
+void realizarPrestamo() {
     if (totalEstudiantes == 0 || totalLibros == 0) {
-        cout << "\n[INFO] No hay estudiantes o libros registrados para realizar la búsqueda.\n";
+        cout << "\n[INFO] No hay estudiantes o libros para realizar el préstamo.\n";
         system("pause");
         system("cls");
         return;
     }
-    
-    inicioBusquedaPrestamo:
-    cout << "\n=== BÚSQUEDA DE PRÉSTAMO ===\n";
+
+    inicioRegistrarPrestamo:
+    cout << "\n=== REGISTRAR PRÉSTAMO ===\n";
     string carnetBusqueda, codigoBusqueda;
 
     do {
@@ -606,7 +613,7 @@ void buscarPrestamo() {
             cout << "[ERROR] El carnet no puede estar vacío.\n";
             system("pause");
             system("cls");
-            goto inicioBusquedaPrestamo;
+            goto inicioRegistrarPrestamo;
         }
     } while (carnetBusqueda.empty());
 
@@ -618,7 +625,7 @@ void buscarPrestamo() {
             cout << "[ERROR] El código no puede estar vacío.\n";
             system("pause");
             system("cls");
-            goto inicioBusquedaPrestamo;
+            goto inicioRegistrarPrestamo;
         }
     } while (codigoBusqueda.empty());
 
@@ -638,30 +645,67 @@ void buscarPrestamo() {
         }
     }
 
-    if(indiceEstudiante == -1 || indiceLibro == -1) {
-        cout << "\n[INFO] No se encontró el préstamo con los datos proporcionados.\n";
-    } else {
-        cout << "\n-----------------------------------------\n";
-        cout << "Estudiante encontrado: \n";
-        cout << "Nombres:   " << estudianteNombre[indiceEstudiante] << "\n";
-        cout << "Apellidos: " << estudianteApellidos[indiceEstudiante] << "\n";
-        cout << "Carnet:    " << estudianteCarnet[indiceEstudiante];
-        cout << "\n-----------------------------------------\n";
-        cout << "Libro encontrado: \n";
-        cout << "Título:     " << libroTitulo[indiceLibro] << "\n";
-        cout << "Código:     " << libroCodigo[indiceLibro] << "\n";
-        cout << "Autor:      " << libroAutor[indiceLibro] << "\n";
-        cout << "Año:        " << libroAnio[indiceLibro] << "\n";
-        cout << "Categoría:  " << libroCategoria[indiceLibro] << "\n";
-        cout << "Ejemplares: " << libroEjemplares[indiceLibro];
-        cout << "\n-----------------------------------------\n";
-    
+    if (indiceEstudiante == -1 || indiceLibro == -1) {
+        cout << "\n[ERROR] No se encontró al estudiante o al libro con los datos proporcionados.\n";
+        system("pause");
+        system("cls");
+        return;
     }
-    
-    inicioDevolucionLibro:
+
+    if (libroEjemplares[indiceLibro] <= 0) {
+        cout << "\n[ERROR] No hay ejemplares disponibles de '" << libroTitulo[indiceLibro] << "'.\n";
+        system("pause");
+        system("cls");
+        return;
+    }
+
+    for (int i = 0; i < totalPrestamos; ++i) {
+        if (prestamoCarnet[i] == carnetBusqueda && prestamoCodigo[i] == codigoBusqueda) {
+            cout << "\n[ERROR] El estudiante ya tiene un préstamo activo de este libro.\n";
+            system("pause");
+            system("cls");
+            return;
+        }
+    }
+
+    prestamoCarnet.push_back(carnetBusqueda);
+    prestamoCodigo.push_back(codigoBusqueda);
+    totalPrestamos++;
+
+    // Restamos un ejemplar disponible al prestar el libro
+    libroEjemplares[indiceLibro]--;
+
+    cout << "\n[INFO] ¡Préstamo registrado exitosamente!\n";
+    cout << "-----------------------------------------\n";
+    cout << "Estudiante: \n";
+    cout << "Nombres:   " << estudianteNombre[indiceEstudiante] << "\n";
+    cout << "Apellidos: " << estudianteApellidos[indiceEstudiante] << "\n";
+    cout << "Carnet:    " << estudianteCarnet[indiceEstudiante];
+    cout << "\n-----------------------------------------\n";
+    cout << "Libro: \n";
+    cout << "Título:     " << libroTitulo[indiceLibro] << "\n";
+    cout << "Código:     " << libroCodigo[indiceLibro] << "\n";
+    cout << "Autor:      " << libroAutor[indiceLibro] << "\n";
+    cout << "Año:        " << libroAnio[indiceLibro] << "\n";
+    cout << "Categoría:  " << libroCategoria[indiceLibro] << "\n";
+    cout << "Ejemplares disponibles: " << libroEjemplares[indiceLibro];
+    cout << "\n-----------------------------------------\n";
+
+    system("pause");
+    system("cls");
+}
+
+void devolverLibro() {
+    if (totalPrestamos == 0) {
+        cout << "\n[INFO] No hay préstamos activos para devolver.\n";
+        system("pause");
+        system("cls");
+        return;
+    }
+
+    inicioDevolverLibro:
     cout << "\n=== DEVOLUCIÓN DE LIBRO ===\n";
-    carnetBusqueda = "";
-    codigoBusqueda = "";
+    string carnetBusqueda, codigoBusqueda;
 
     do {
         cout << "Ingrese el carnet del estudiante: ";
@@ -671,7 +715,7 @@ void buscarPrestamo() {
             cout << "[ERROR] El carnet no puede estar vacío.\n";
             system("pause");
             system("cls");
-            goto inicioDevolucionLibro;
+            goto inicioDevolverLibro;
         }
     } while (carnetBusqueda.empty());
 
@@ -683,11 +727,26 @@ void buscarPrestamo() {
             cout << "[ERROR] El código no puede estar vacío.\n";
             system("pause");
             system("cls");
-            goto inicioDevolucionLibro;
+            goto inicioDevolverLibro;
         }
     } while (codigoBusqueda.empty());
 
-    indiceEstudiante = -1;
+    int indicePrestamo = -1;
+    for (int i = 0; i < totalPrestamos; ++i) {
+        if (prestamoCarnet[i] == carnetBusqueda && prestamoCodigo[i] == codigoBusqueda) {
+            indicePrestamo = i;
+            break;
+        }
+    }
+
+    if (indicePrestamo == -1) {
+        cout << "\n[ERROR] No existe un préstamo activo con el carnet y código proporcionados.\n";
+        system("pause");
+        system("cls");
+        return;
+    }
+
+    int indiceEstudiante = -1;
     for (int i = 0; i < totalEstudiantes; ++i) {
         if (estudianteCarnet[i] == carnetBusqueda) {
             indiceEstudiante = i;
@@ -695,7 +754,7 @@ void buscarPrestamo() {
         }
     }
 
-    indiceLibro = -1;
+    int indiceLibro = -1;
     for (int i = 0; i < totalLibros; ++i) {
         if (libroCodigo[i] == codigoBusqueda) {
             indiceLibro = i;
@@ -703,23 +762,24 @@ void buscarPrestamo() {
         }
     }
 
-    if (indiceEstudiante == -1 || indiceLibro == -1) {
-        cout << "\n[ERROR] No se encontró al estudiante o al libro con los datos proporcionados.\n";
-        system("pause");
-        system("cls");
-        goto inicioDevolucionLibro;
-    } else {
-        // Incrementamos los ejemplares disponibles al devolver el libro
-        libroEjemplares[indiceLibro]++;
-        cout << "\n[INFO] ¡Libro devuelto exitosamente!\n";
+    prestamoCarnet.erase(prestamoCarnet.begin() + indicePrestamo);
+    prestamoCodigo.erase(prestamoCodigo.begin() + indicePrestamo);
+    totalPrestamos--;
+
+    cout << "\n[INFO] ¡Libro devuelto exitosamente!\n";
+    if (indiceEstudiante != -1) {
         cout << "Estudiante: " << estudianteNombre[indiceEstudiante] << " " << estudianteApellidos[indiceEstudiante] << "\n";
+    }
+    if (indiceLibro != -1) {
+        // Sumamos el ejemplar devuelto al stock disponible
+        libroEjemplares[indiceLibro]++;
         cout << "Libro:      " << libroTitulo[indiceLibro] << " (Código: " << libroCodigo[indiceLibro] << ")\n";
         cout << "Ejemplares actuales disponibles: " << libroEjemplares[indiceLibro] << "\n";
-}
+    }
+
     system("pause");
     system("cls");
 }
-
 
 void agregarStock() {
     if (totalLibros == 0) {
@@ -749,7 +809,7 @@ void agregarStock() {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
         system("pause");
         system("cls");
-        goto inicioAgregarStock;
+        return;
     } else {
         int nuevosEjemplares = 0;
         cout << "\nLibro encontrado: " << libroTitulo[indice] << "\n";
