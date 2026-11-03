@@ -6,25 +6,32 @@
 
 using namespace std;
 
+struct Libro {
+    string codigo;
+    string titulo;
+    string autor;
+    string categoria;
+    int anio;
+    int ejemplares;
+};
+
+struct Estudiante {
+    string nombre;
+    string apellidos;
+    string carnet;
+};
+
+struct Prestamo {
+    string carnet;
+    string codigoLibro;
+};
+
 int opcion, opcionCat;
-int totalLibros = 0;
-int totalEstudiantes = 0;
-int anioActual = 2026;
+const int anioActual = 2026;
 
-vector<string> libroCodigo;
-vector<string> libroTitulo;
-vector<string> libroAutor;
-vector<int> libroAnio;
-vector<string> libroCategoria;
-vector<int> libroEjemplares;
-
-vector<string> estudianteNombre;
-vector<string> estudianteApellidos;
-vector<string> estudianteCarnet;
-
-int totalPrestamos = 0;
-vector<string> prestamoCarnet;
-vector<string> prestamoCodigo;
+vector<Libro> libros;
+vector<Estudiante> estudiantes;
+vector<Prestamo> prestamos;
 
 void mostrarMenu();
 void registrarLibro();
@@ -37,7 +44,34 @@ void modificarLibro();
 void eliminarLibro();
 void modificarEstudiante();
 void eliminarEstudiante();
-void agregarStock(); 
+void agregarStock();
+
+int buscarLibro(const string& codigo) {
+    for (int i = 0; i < static_cast<int>(libros.size()); ++i) {
+        if (libros[i].codigo == codigo) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int buscarEstudiante(const string& carnet) {
+    for (int i = 0; i < static_cast<int>(estudiantes.size()); ++i) {
+        if (estudiantes[i].carnet == carnet) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int buscarPrestamo(const string& carnet, const string& codigoLibro) {
+    for (int i = 0; i < static_cast<int>(prestamos.size()); ++i) {
+        if (prestamos[i].carnet == carnet && prestamos[i].codigoLibro == codigoLibro) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
@@ -84,17 +118,15 @@ int main() {
                 devolverLibro();
                 break;
             case 11:
-                agregarStock(); // NUEVO: Llamada a la función de stock
+                agregarStock();
                 break;
             case 12:
                 cout << "\n[INFO] Saliendo del sistema...\n";
                 break;
             default:
                 cout << "\n[ERROR] Opción no válida.\n";
-                system("pause");
-                system("cls");
         }
-    } while (opcion != 12); // Modificado para salir con 12
+    } while (opcion != 12);
     return 0;
 }
 
@@ -112,79 +144,57 @@ void mostrarMenu() {
     cout << "8. Eliminar estudiante\n";
     cout << "9. Registrar préstamo\n";
     cout << "10. Devolver libro\n";
-    cout << "11. Agregar Stock a un Libro\n"; 
+    cout << "11. Agregar Stock a un Libro\n";
     cout << "12. Salir";
     cout << "\n========================================\n";
 }
 
 void registrarLibro() {
-    inicioRegistrarLibro:
     cout << "\n=== REGISTRO DE NUEVO LIBRO ===\n";
-    string codigo, titulo, autor, categoria;
-    int anio = 0;
-    int ejemplares = 0;
-    bool codigoRepetido = false;
+    Libro nuevoLibro;
+    bool codigoValido = false;
 
     do {
-        codigoRepetido = false;
         cout << "Ingrese el código del libro: ";
-        getline(cin, codigo);
+        getline(cin, nuevoLibro.codigo);
 
-        if (codigo.empty()) {
+        if (nuevoLibro.codigo.empty()) {
             cout << "[ERROR] El código no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarLibro;
+        } else if (buscarLibro(nuevoLibro.codigo) != -1) {
+            cout << "[ERROR] El código del libro ya está registrado (repetido).\n";
         } else {
-            for (int i = 0; i < totalLibros; ++i) {
-                if (libroCodigo[i] == codigo) {
-                    cout << "[ERROR] El código del libro ya está registrado (repetido).\n";
-                    codigoRepetido = true;
-                    system("pause");
-                    system("cls");
-                    goto inicioRegistrarLibro;
-                }
-            }
+            codigoValido = true;
         }
-    } while (codigo.empty() || codigoRepetido);
+    } while (!codigoValido);
 
     do {
         cout << "Ingrese el título: ";
-        getline(cin, titulo);
+        getline(cin, nuevoLibro.titulo);
 
-        if (titulo.empty()) {
+        if (nuevoLibro.titulo.empty()) {
             cout << "[ERROR] El título no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarLibro;
         }
-    } while (titulo.empty());
+    } while (nuevoLibro.titulo.empty());
 
     do {
         cout << "Ingrese el autor: ";
-        getline(cin, autor);
+        getline(cin, nuevoLibro.autor);
 
-        if (autor.empty()) {
+        if (nuevoLibro.autor.empty()) {
             cout << "[ERROR] El autor no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarLibro;
         }
-    } while (autor.empty());
+    } while (nuevoLibro.autor.empty());
 
     do {
         cout << "Ingrese el año de publicación: ";
-        cin >> anio;
+        cin >> nuevoLibro.anio;
         cin.clear();
         cin.ignore(1000, '\n');
 
-        if (anio <= 0 || anio > anioActual) {
+        if (nuevoLibro.anio <= 0 || nuevoLibro.anio > anioActual) {
             cout << "[ERROR] Ingrese un año válido (entre 1 y " << anioActual << ").\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarLibro;
         }
-    } while (anio <= 0 || anio > anioActual);
+    } while (nuevoLibro.anio <= 0 || nuevoLibro.anio > anioActual);
 
     do {
         cout << "\nSeleccione la categoría del libro:\n";
@@ -200,264 +210,199 @@ void registrarLibro() {
         cin.ignore(1000, '\n');
 
         switch (opcionCat) {
-            case 1: categoria = "Ficción"; break;
-            case 2: categoria = "No Ficción"; break;
-            case 3: categoria = "Ciencia"; break;
-            case 4: categoria = "Historia"; break;
-            case 5: categoria = "Tecnología"; break;
-            case 6: categoria = "Otra"; break;
-            default: 
+            case 1: nuevoLibro.categoria = "Ficción"; break;
+            case 2: nuevoLibro.categoria = "No Ficción"; break;
+            case 3: nuevoLibro.categoria = "Ciencia"; break;
+            case 4: nuevoLibro.categoria = "Historia"; break;
+            case 5: nuevoLibro.categoria = "Tecnología"; break;
+            case 6: nuevoLibro.categoria = "Otra"; break;
+            default:
                 cout << "[ERROR] Debe elegir un número del 1 al 6.\n";
-                system("pause");
-                system("cls");
-                goto inicioRegistrarLibro;
+                break;
         }
     } while (opcionCat < 1 || opcionCat > 6);
 
     do {
         cout << "Ingrese la cantidad de ejemplares: ";
-        cin >> ejemplares;
+        cin >> nuevoLibro.ejemplares;
         cin.clear();
         cin.ignore(1000, '\n');
 
-        if (ejemplares <= 0) {
+        if (nuevoLibro.ejemplares <= 0) {
             cout << "[ERROR] La cantidad debe ser mayor a cero.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarLibro;
         }
-    } while (ejemplares <= 0);
+    } while (nuevoLibro.ejemplares <= 0);
 
-    libroCodigo.push_back(codigo);
-    libroTitulo.push_back(titulo);
-    libroAutor.push_back(autor);
-    libroAnio.push_back(anio);
-    libroCategoria.push_back(categoria);
-    libroEjemplares.push_back(ejemplares);
-    totalLibros++;
+    libros.push_back(nuevoLibro);
 
     cout << "\n[INFO] ¡Libro registrado exitosamente!\n";
 
-    system("pause");
-    system("cls");
 }
 
 void registrarEstudiante() {
-    inicioRegistrarEstudiante:
     cout << "\n=== REGISTRO DE NUEVO ESTUDIANTE ===\n";
-    string nombre, apellidos, carnet;
-    bool carnetRepetido = false;
+    Estudiante nuevoEstudiante;
+    bool carnetValido = false;
 
     do {
         cout << "Ingrese los nombres del estudiante: ";
-        getline(cin, nombre);
+        getline(cin, nuevoEstudiante.nombre);
 
-        if (nombre.empty()) {
+        if (nuevoEstudiante.nombre.empty()) {
             cout << "[ERROR] El nombre no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarEstudiante;
         }
-    } while (nombre.empty());
+    } while (nuevoEstudiante.nombre.empty());
 
     do {
         cout << "Ingrese los apellidos del estudiante: ";
-        getline(cin, apellidos);
+        getline(cin, nuevoEstudiante.apellidos);
 
-        if (apellidos.empty()) {
+        if (nuevoEstudiante.apellidos.empty()) {
             cout << "[ERROR] Los apellidos no pueden estar vacíos.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarEstudiante;
         }
-    } while (apellidos.empty());
+    } while (nuevoEstudiante.apellidos.empty());
 
     do {
-        carnetRepetido = false;
         cout << "Ingrese el carnet del estudiante: ";
-        getline(cin, carnet);
+        getline(cin, nuevoEstudiante.carnet);
 
-        if (carnet.empty()) {
+        if (nuevoEstudiante.carnet.empty()) {
             cout << "[ERROR] El carnet no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarEstudiante;
+        } else if (buscarEstudiante(nuevoEstudiante.carnet) != -1) {
+            cout << "[ERROR] El carnet del estudiante ya está registrado (repetido).\n";
         } else {
-            for (int i = 0; i < totalEstudiantes; ++i) {
-                if (estudianteCarnet[i] == carnet) {
-                    cout << "[ERROR] El carnet del estudiante ya está registrado (repetido).\n";
-                    carnetRepetido = true;
-                    system("pause");
-                    system("cls");
-                    goto inicioRegistrarEstudiante;
-                }
-            }
+            carnetValido = true;
         }
-    } while (carnet.empty() || carnetRepetido);
+    } while (!carnetValido);
 
-    estudianteNombre.push_back(nombre);
-    estudianteApellidos.push_back(apellidos);
-    estudianteCarnet.push_back(carnet);
-    totalEstudiantes++;
+    estudiantes.push_back(nuevoEstudiante);
 
     cout << "\n[INFO] ¡Estudiante registrado exitosamente!\n";
 
-    system("pause");
-    system("cls");
 }
 
 void consultarLibros() {
-    if (totalLibros > 0) {
+    if (!libros.empty()) {
         cout << "\n=== CONSULTA DE LIBROS REGISTRADOS ===\n";
         cout << "----------------------------------------\n";
-        for (int i = 0; i < totalLibros; ++i) {
+        for (int i = 0; i < static_cast<int>(libros.size()); ++i) {
             cout << "[Libro #" << (i + 1) << "]\n";
-            cout << "Código:     " << libroCodigo[i] << "\n";
-            cout << "Título:     " << libroTitulo[i] << "\n";
-            cout << "Autor:      " << libroAutor[i] << "\n";
-            cout << "Año:        " << libroAnio[i] << "\n";
-            cout << "Categoría:  " << libroCategoria[i] << "\n";
-            cout << "Ejemplares: " << libroEjemplares[i] << "\n";
+            cout << "Código:     " << libros[i].codigo << "\n";
+            cout << "Título:     " << libros[i].titulo << "\n";
+            cout << "Autor:      " << libros[i].autor << "\n";
+            cout << "Año:        " << libros[i].anio << "\n";
+            cout << "Categoría:  " << libros[i].categoria << "\n";
+            cout << "Ejemplares: " << libros[i].ejemplares << "\n";
             cout << "----------------------------------------\n";
-        } 
+        }
     } else {
         cout << "\n[INFO] No hay libros registrados.\n";
     }
-    system("pause");
-    system("cls");
 }
 
 void consultarEstudiantes() {
-    if (totalEstudiantes > 0) {
+    if (!estudiantes.empty()) {
         cout << "\n=== CONSULTA DE ESTUDIANTES REGISTRADOS ===\n";
         cout << "------------------------------------------\n";
-        for (int i = 0; i < totalEstudiantes; ++i) {
+        for (int i = 0; i < static_cast<int>(estudiantes.size()); ++i) {
             cout << "[Estudiante #" << (i + 1) << "]\n";
-            cout << "Nombres:    " << estudianteNombre[i] << "\n";
-            cout << "Apellidos:  " << estudianteApellidos[i] << "\n";
-            cout << "Carnet:     " << estudianteCarnet[i] << "\n";
+            cout << "Nombres:    " << estudiantes[i].nombre << "\n";
+            cout << "Apellidos:  " << estudiantes[i].apellidos << "\n";
+            cout << "Carnet:     " << estudiantes[i].carnet << "\n";
             cout << "------------------------------------------\n";
         }
     } else {
         cout << "\n[INFO] No hay estudiantes registrados.\n";
     }
-    system("pause");
-    system("cls");
 }
 
 void modificarLibro() {
-    if (totalLibros == 0) {
+    if (libros.empty()) {
         cout << "\n[INFO] No hay libros registrados para modificar.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    inicioModificarLibro:
     string codigoBusqueda;
     cout << "\n=== MODIFICAR LIBRO ===\n";
     cout << "Ingrese el código del libro a modificar: ";
     getline(cin, codigoBusqueda);
 
-    int indice = -1;
-    for (int i = 0; i < totalLibros; ++i) {
-        if (libroCodigo[i] == codigoBusqueda) {
-            indice = i;
-            break;
-        }
-    }
+    int indice = buscarLibro(codigoBusqueda);
 
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
-        system("pause");
-        system("cls");
         return;
-    } else {
-        cout << "\n--- Ingrese los nuevos datos del libro ---\n";
-
-        do {
-            cout << "Nuevo título: ";
-            getline(cin, libroTitulo[indice]);
-            if (libroTitulo[indice].empty()) {
-                cout << "[ERROR] El título no puede estar vacío.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarLibro;
-            }
-        } while (libroTitulo[indice].empty());
-
-        do {
-            cout << "Nuevo autor: ";
-            getline(cin, libroAutor[indice]);
-            if (libroAutor[indice].empty()) {
-                cout << "[ERROR] El autor no puede estar vacío.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarLibro;
-            }
-        } while (libroAutor[indice].empty());
-
-        do {
-            cout << "Nuevo año de publicación: ";
-            cin >> libroAnio[indice];
-            cin.clear();
-            cin.ignore(1000, '\n');
-            if (libroAnio[indice] <= 0 || libroAnio[indice] > anioActual) {
-                cout << "[ERROR] Ingrese un año válido.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarLibro;
-            }
-        } while (libroAnio[indice] <= 0 || libroAnio[indice] > anioActual);
-
-        do {
-            cout << "\nSeleccione la nueva categoría:\n";
-            cout << "1. Ficción\n2. No Ficción\n3. Ciencia\n4. Historia\n5. Tecnología\n6. Otra\n";
-            cout << "Opción: ";
-            cin >> opcionCat;
-            cin.clear();
-            cin.ignore(1000, '\n');
-
-            switch (opcionCat) {
-                case 1: libroCategoria[indice] = "Ficción"; break;
-                case 2: libroCategoria[indice] = "No Ficción"; break;
-                case 3: libroCategoria[indice] = "Ciencia"; break;
-                case 4: libroCategoria[indice] = "Historia"; break;
-                case 5: libroCategoria[indice] = "Tecnología"; break;
-                case 6: libroCategoria[indice] = "Otra"; break;
-                default: 
-                    cout << "[ERROR] Opción no válida.\n"; 
-                    system("pause");
-                    system("cls");
-                    goto inicioModificarLibro;
-            }
-        } while (opcionCat < 1 || opcionCat > 6);
-
-        do {
-            cout << "Nueva cantidad de ejemplares: ";
-            cin >> libroEjemplares[indice];
-            cin.clear();
-            cin.ignore(1000, '\n');
-            if (libroEjemplares[indice] <= 0) {
-                cout << "[ERROR] La cantidad debe ser mayor a cero.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarLibro;
-            }
-        } while (libroEjemplares[indice] <= 0);
-
-        cout << "\n[INFO] ¡Libro modificado exitosamente!\n";
     }
 
-    system("pause");
-    system("cls");
+    cout << "\n--- Ingrese los nuevos datos del libro ---\n";
+    Libro libroModificado = libros[indice];
+
+    do {
+        cout << "Nuevo título: ";
+        getline(cin, libroModificado.titulo);
+        if (libroModificado.titulo.empty()) {
+            cout << "[ERROR] El título no puede estar vacío.\n";
+        }
+    } while (libroModificado.titulo.empty());
+
+    do {
+        cout << "Nuevo autor: ";
+        getline(cin, libroModificado.autor);
+        if (libroModificado.autor.empty()) {
+            cout << "[ERROR] El autor no puede estar vacío.\n";
+        }
+    } while (libroModificado.autor.empty());
+
+    do {
+        cout << "Nuevo año de publicación: ";
+        cin >> libroModificado.anio;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        if (libroModificado.anio <= 0 || libroModificado.anio > anioActual) {
+            cout << "[ERROR] Ingrese un año válido.\n";
+        }
+    } while (libroModificado.anio <= 0 || libroModificado.anio > anioActual);
+
+    do {
+        cout << "\nSeleccione la nueva categoría:\n";
+        cout << "1. Ficción\n2. No Ficción\n3. Ciencia\n4. Historia\n5. Tecnología\n6. Otra\n";
+        cout << "Opción: ";
+        cin >> opcionCat;
+        cin.clear();
+        cin.ignore(1000, '\n');
+
+        switch (opcionCat) {
+            case 1: libroModificado.categoria = "Ficción"; break;
+            case 2: libroModificado.categoria = "No Ficción"; break;
+            case 3: libroModificado.categoria = "Ciencia"; break;
+            case 4: libroModificado.categoria = "Historia"; break;
+            case 5: libroModificado.categoria = "Tecnología"; break;
+            case 6: libroModificado.categoria = "Otra"; break;
+            default:
+                cout << "[ERROR] Opción no válida.\n";
+                break;
+        }
+    } while (opcionCat < 1 || opcionCat > 6);
+
+    do {
+        cout << "Nueva cantidad de ejemplares: ";
+        cin >> libroModificado.ejemplares;
+        cin.clear();
+        cin.ignore(1000, '\n');
+        if (libroModificado.ejemplares <= 0) {
+            cout << "[ERROR] La cantidad debe ser mayor a cero.\n";
+        }
+    } while (libroModificado.ejemplares <= 0);
+
+    libros[indice] = libroModificado;
+
+    cout << "\n[INFO] ¡Libro modificado exitosamente!\n";
+
 }
 
 void eliminarLibro() {
-    if (totalLibros == 0) {
+    if (libros.empty()) {
         cout << "\n[INFO] No hay libros registrados para eliminar.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
@@ -466,99 +411,65 @@ void eliminarLibro() {
     cout << "Ingrese el código del libro a eliminar: ";
     getline(cin, codigoBusqueda);
 
-    int indice = -1;
-    for (int i = 0; i < totalLibros; ++i) {
-        if (libroCodigo[i] == codigoBusqueda) {
-            indice = i;
-            break;
-        }
-    }
+    int indice = buscarLibro(codigoBusqueda);
 
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
-        system("pause");
-        system("cls");
         return;
     } else {
-        libroCodigo.erase(libroCodigo.begin() + indice);
-        libroTitulo.erase(libroTitulo.begin() + indice);
-        libroAutor.erase(libroAutor.begin() + indice);
-        libroAnio.erase(libroAnio.begin() + indice);
-        libroCategoria.erase(libroCategoria.begin() + indice);
-        libroEjemplares.erase(libroEjemplares.begin() + indice);
-        totalLibros--;
+        libros.erase(libros.begin() + indice);
 
         cout << "\n[INFO] ¡Libro eliminado exitosamente!\n";
     }
 
-    system("pause");
-    system("cls");
 }
 
 void modificarEstudiante() {
-    if (totalEstudiantes == 0) {
+    if (estudiantes.empty()) {
         cout << "\n[INFO] No hay estudiantes registrados para modificar.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    inicioModificarEstudiante:
     string carnetBusqueda;
     cout << "\n=== MODIFICAR ESTUDIANTE ===\n";
     cout << "Ingrese el carnet del estudiante a modificar: ";
     getline(cin, carnetBusqueda);
 
-    int indice = -1;
-    for (int i = 0; i < totalEstudiantes; ++i) {
-        if (estudianteCarnet[i] == carnetBusqueda) {
-            indice = i;
-            break;
-        }
-    }
+    int indice = buscarEstudiante(carnetBusqueda);
 
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún estudiante con el carnet proporcionado.\n";
-        system("pause");
-        system("cls");
         return;
-    } else {
-        cout << "\n--- Ingrese los nuevos datos del estudiante ---\n";
-
-        do {
-            cout << "Nuevos nombres: ";
-            getline(cin, estudianteNombre[indice]);
-            if (estudianteNombre[indice].empty()) {
-                cout << "[ERROR] El nombre no puede estar vacío.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarEstudiante;
-            }
-        } while (estudianteNombre[indice].empty());
-
-        do {
-            cout << "Nuevos apellidos: ";
-            getline(cin, estudianteApellidos[indice]);
-            if (estudianteApellidos[indice].empty()) {
-                cout << "[ERROR] Los apellidos no pueden estar vacíos.\n";
-                system("pause");
-                system("cls");
-                goto inicioModificarEstudiante;
-            }
-        } while (estudianteApellidos[indice].empty());
-
-        cout << "\n[INFO] ¡Estudiante modificado exitosamente!\n";
     }
 
-    system("pause");
-    system("cls");
+    cout << "\n--- Ingrese los nuevos datos del estudiante ---\n";
+    Estudiante estudianteModificado = estudiantes[indice];
+
+    do {
+        cout << "Nuevos nombres: ";
+        getline(cin, estudianteModificado.nombre);
+        if (estudianteModificado.nombre.empty()) {
+            cout << "[ERROR] El nombre no puede estar vacío.\n";
+        }
+    } while (estudianteModificado.nombre.empty());
+
+    do {
+        cout << "Nuevos apellidos: ";
+        getline(cin, estudianteModificado.apellidos);
+        if (estudianteModificado.apellidos.empty()) {
+            cout << "[ERROR] Los apellidos no pueden estar vacíos.\n";
+        }
+    } while (estudianteModificado.apellidos.empty());
+
+    estudiantes[indice] = estudianteModificado;
+
+    cout << "\n[INFO] ¡Estudiante modificado exitosamente!\n";
+
 }
 
 void eliminarEstudiante() {
-    if (totalEstudiantes == 0) {
+    if (estudiantes.empty()) {
         cout << "\n[INFO] No hay estudiantes registrados para eliminar.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
@@ -567,41 +478,25 @@ void eliminarEstudiante() {
     cout << "Ingrese el carnet del estudiante a eliminar: ";
     getline(cin, carnetBusqueda);
 
-    int indice = -1;
-    for (int i = 0; i < totalEstudiantes; ++i) {
-        if (estudianteCarnet[i] == carnetBusqueda) {
-            indice = i;
-            break;
-        }
-    }
+    int indice = buscarEstudiante(carnetBusqueda);
 
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún estudiante con el carnet proporcionado.\n";
-        system("pause");
-        system("cls");
         return;
     } else {
-        estudianteNombre.erase(estudianteNombre.begin() + indice);
-        estudianteApellidos.erase(estudianteApellidos.begin() + indice);
-        estudianteCarnet.erase(estudianteCarnet.begin() + indice);
-        totalEstudiantes--;
+        estudiantes.erase(estudiantes.begin() + indice);
 
         cout << "\n[INFO] ¡Estudiante eliminado exitosamente!\n";
     }
 
-    system("pause");
-    system("cls");
 }
 
 void realizarPrestamo() {
-    if (totalEstudiantes == 0 || totalLibros == 0) {
+    if (estudiantes.empty() || libros.empty()) {
         cout << "\n[INFO] No hay estudiantes o libros para realizar el préstamo.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    inicioRegistrarPrestamo:
     cout << "\n=== REGISTRAR PRÉSTAMO ===\n";
     string carnetBusqueda, codigoBusqueda;
 
@@ -611,9 +506,6 @@ void realizarPrestamo() {
 
         if (carnetBusqueda.empty()) {
             cout << "[ERROR] El carnet no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarPrestamo;
         }
     } while (carnetBusqueda.empty());
 
@@ -623,87 +515,59 @@ void realizarPrestamo() {
 
         if (codigoBusqueda.empty()) {
             cout << "[ERROR] El código no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioRegistrarPrestamo;
         }
     } while (codigoBusqueda.empty());
 
-    int indiceEstudiante = -1;
-    for (int i = 0; i < totalEstudiantes; ++i) {
-        if (estudianteCarnet[i] == carnetBusqueda) {
-            indiceEstudiante = i;
-            break;
-        }
-    }
-
-    int indiceLibro = -1;
-    for (int i = 0; i < totalLibros; ++i) {
-        if (libroCodigo[i] == codigoBusqueda) {
-            indiceLibro = i;
-            break;
-        }
-    }
+    int indiceEstudiante = buscarEstudiante(carnetBusqueda);
+    int indiceLibro = buscarLibro(codigoBusqueda);
 
     if (indiceEstudiante == -1 || indiceLibro == -1) {
         cout << "\n[ERROR] No se encontró al estudiante o al libro con los datos proporcionados.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    if (libroEjemplares[indiceLibro] <= 0) {
-        cout << "\n[ERROR] No hay ejemplares disponibles de '" << libroTitulo[indiceLibro] << "'.\n";
-        system("pause");
-        system("cls");
+    if (libros[indiceLibro].ejemplares <= 0) {
+        cout << "\n[ERROR] No hay ejemplares disponibles de '" << libros[indiceLibro].titulo << "'.\n";
         return;
     }
 
-    for (int i = 0; i < totalPrestamos; ++i) {
-        if (prestamoCarnet[i] == carnetBusqueda && prestamoCodigo[i] == codigoBusqueda) {
-            cout << "\n[ERROR] El estudiante ya tiene un préstamo activo de este libro.\n";
-            system("pause");
-            system("cls");
-            return;
-        }
+    if (buscarPrestamo(carnetBusqueda, codigoBusqueda) != -1) {
+        cout << "\n[ERROR] El estudiante ya tiene un préstamo activo de este libro.\n";
+        return;
     }
 
-    prestamoCarnet.push_back(carnetBusqueda);
-    prestamoCodigo.push_back(codigoBusqueda);
-    totalPrestamos++;
+    Prestamo nuevoPrestamo;
+    nuevoPrestamo.carnet = carnetBusqueda;
+    nuevoPrestamo.codigoLibro = codigoBusqueda;
+    prestamos.push_back(nuevoPrestamo);
 
     // Restamos un ejemplar disponible al prestar el libro
-    libroEjemplares[indiceLibro]--;
+    libros[indiceLibro].ejemplares--;
 
     cout << "\n[INFO] ¡Préstamo registrado exitosamente!\n";
     cout << "-----------------------------------------\n";
     cout << "Estudiante: \n";
-    cout << "Nombres:   " << estudianteNombre[indiceEstudiante] << "\n";
-    cout << "Apellidos: " << estudianteApellidos[indiceEstudiante] << "\n";
-    cout << "Carnet:    " << estudianteCarnet[indiceEstudiante];
+    cout << "Nombres:   " << estudiantes[indiceEstudiante].nombre << "\n";
+    cout << "Apellidos: " << estudiantes[indiceEstudiante].apellidos << "\n";
+    cout << "Carnet:    " << estudiantes[indiceEstudiante].carnet;
     cout << "\n-----------------------------------------\n";
     cout << "Libro: \n";
-    cout << "Título:     " << libroTitulo[indiceLibro] << "\n";
-    cout << "Código:     " << libroCodigo[indiceLibro] << "\n";
-    cout << "Autor:      " << libroAutor[indiceLibro] << "\n";
-    cout << "Año:        " << libroAnio[indiceLibro] << "\n";
-    cout << "Categoría:  " << libroCategoria[indiceLibro] << "\n";
-    cout << "Ejemplares disponibles: " << libroEjemplares[indiceLibro];
+    cout << "Título:     " << libros[indiceLibro].titulo << "\n";
+    cout << "Código:     " << libros[indiceLibro].codigo << "\n";
+    cout << "Autor:      " << libros[indiceLibro].autor << "\n";
+    cout << "Año:        " << libros[indiceLibro].anio << "\n";
+    cout << "Categoría:  " << libros[indiceLibro].categoria << "\n";
+    cout << "Ejemplares disponibles: " << libros[indiceLibro].ejemplares;
     cout << "\n-----------------------------------------\n";
 
-    system("pause");
-    system("cls");
 }
 
 void devolverLibro() {
-    if (totalPrestamos == 0) {
+    if (prestamos.empty()) {
         cout << "\n[INFO] No hay préstamos activos para devolver.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    inicioDevolverLibro:
     cout << "\n=== DEVOLUCIÓN DE LIBRO ===\n";
     string carnetBusqueda, codigoBusqueda;
 
@@ -713,9 +577,6 @@ void devolverLibro() {
 
         if (carnetBusqueda.empty()) {
             cout << "[ERROR] El carnet no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioDevolverLibro;
         }
     } while (carnetBusqueda.empty());
 
@@ -725,97 +586,55 @@ void devolverLibro() {
 
         if (codigoBusqueda.empty()) {
             cout << "[ERROR] El código no puede estar vacío.\n";
-            system("pause");
-            system("cls");
-            goto inicioDevolverLibro;
         }
     } while (codigoBusqueda.empty());
 
-    int indicePrestamo = -1;
-    for (int i = 0; i < totalPrestamos; ++i) {
-        if (prestamoCarnet[i] == carnetBusqueda && prestamoCodigo[i] == codigoBusqueda) {
-            indicePrestamo = i;
-            break;
-        }
-    }
+    int indicePrestamo = buscarPrestamo(carnetBusqueda, codigoBusqueda);
 
     if (indicePrestamo == -1) {
         cout << "\n[ERROR] No existe un préstamo activo con el carnet y código proporcionados.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    int indiceEstudiante = -1;
-    for (int i = 0; i < totalEstudiantes; ++i) {
-        if (estudianteCarnet[i] == carnetBusqueda) {
-            indiceEstudiante = i;
-            break;
-        }
-    }
+    int indiceEstudiante = buscarEstudiante(carnetBusqueda);
+    int indiceLibro = buscarLibro(codigoBusqueda);
 
-    int indiceLibro = -1;
-    for (int i = 0; i < totalLibros; ++i) {
-        if (libroCodigo[i] == codigoBusqueda) {
-            indiceLibro = i;
-            break;
-        }
-    }
-
-    prestamoCarnet.erase(prestamoCarnet.begin() + indicePrestamo);
-    prestamoCodigo.erase(prestamoCodigo.begin() + indicePrestamo);
-    totalPrestamos--;
+    prestamos.erase(prestamos.begin() + indicePrestamo);
 
     cout << "\n[INFO] ¡Libro devuelto exitosamente!\n";
     if (indiceEstudiante != -1) {
-        cout << "Estudiante: " << estudianteNombre[indiceEstudiante] << " " << estudianteApellidos[indiceEstudiante] << "\n";
+        cout << "Estudiante: " << estudiantes[indiceEstudiante].nombre << " " << estudiantes[indiceEstudiante].apellidos << "\n";
     }
     if (indiceLibro != -1) {
         // Sumamos el ejemplar devuelto al stock disponible
-        libroEjemplares[indiceLibro]++;
-        cout << "Libro:      " << libroTitulo[indiceLibro] << " (Código: " << libroCodigo[indiceLibro] << ")\n";
-        cout << "Ejemplares actuales disponibles: " << libroEjemplares[indiceLibro] << "\n";
+        libros[indiceLibro].ejemplares++;
+        cout << "Libro:      " << libros[indiceLibro].titulo << " (Código: " << libros[indiceLibro].codigo << ")\n";
+        cout << "Ejemplares actuales disponibles: " << libros[indiceLibro].ejemplares << "\n";
     }
 
-    system("pause");
-    system("cls");
 }
 
 void agregarStock() {
-    if (totalLibros == 0) {
+    if (libros.empty()) {
         cout << "\n[INFO] No hay libros registrados para gestionar stock.\n";
-        system("pause");
-        system("cls");
         return;
     }
 
-    inicioAgregarStock:
     string codigoBusqueda;
     cout << "\n=== AGREGAR STOCK A UN LIBRO ===\n";
     cout << "Ingrese el código del libro: ";
     getline(cin, codigoBusqueda);
 
-    int indice = -1;
-   
-    for (int i = 0; i < totalLibros; ++i) {
-        if (libroCodigo[i] == codigoBusqueda) {
-            indice = i;
-            break;
-        }
-    }
+    int indice = buscarLibro(codigoBusqueda);
 
-   
     if (indice == -1) {
         cout << "\n[ERROR] No se encontró ningún libro con el código proporcionado.\n";
-        system("pause");
-        system("cls");
         return;
     } else {
         int nuevosEjemplares = 0;
-        cout << "\nLibro encontrado: " << libroTitulo[indice] << "\n";
-        cout << "Stock actual: " << libroEjemplares[indice] << " ejemplares.\n";
+        cout << "\nLibro encontrado: " << libros[indice].titulo << "\n";
+        cout << "Stock actual: " << libros[indice].ejemplares << " ejemplares.\n";
 
-        
         do {
             cout << "\nIngrese la cantidad de libros nuevos a agregar al stock: ";
             cin >> nuevosEjemplares;
@@ -824,19 +643,13 @@ void agregarStock() {
 
             if (nuevosEjemplares <= 0) {
                 cout << "[ERROR] La cantidad a agregar debe ser mayor a cero.\n";
-                system("pause");
-                system("cls");
-                goto inicioAgregarStock;
             }
         } while (nuevosEjemplares <= 0);
 
-        
-        libroEjemplares[indice] += nuevosEjemplares;
+        libros[indice].ejemplares += nuevosEjemplares;
 
         cout << "\n[INFO] ¡Stock actualizado exitosamente!\n";
-        cout << "El nuevo stock de '" << libroTitulo[indice] << "' es de " << libroEjemplares[indice] << " ejemplares.\n";
+        cout << "El nuevo stock de '" << libros[indice].titulo << "' es de " << libros[indice].ejemplares << " ejemplares.\n";
     }
 
-    system("pause");
-    system("cls");
 }
