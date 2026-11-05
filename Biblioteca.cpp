@@ -6,6 +6,9 @@
 
 using namespace std;
 
+int opcion, opcionCat;
+const int anioActual = 2026;
+
 struct Libro {
     string codigo;
     string titulo;
@@ -26,9 +29,6 @@ struct Prestamo {
     string codigoLibro;
 };
 
-int opcion, opcionCat;
-const int anioActual = 2026;
-
 vector<Libro> libros;
 vector<Estudiante> estudiantes;
 vector<Prestamo> prestamos;
@@ -46,17 +46,19 @@ void modificarEstudiante();
 void eliminarEstudiante();
 void agregarStock();
 
-int buscarLibro(const string& codigo) {
-    for (int i = 0; i < static_cast<int>(libros.size()); ++i) {
+int buscarLibro(string codigo) {
+    for (int i = 0; i < libros.size(); ++i) {
+        // Si se encuentra un libro, se devuelve su índice
         if (libros[i].codigo == codigo) {
             return i;
         }
     }
+    // Si no se encuentra, se devuelve -1
     return -1;
 }
 
-int buscarEstudiante(const string& carnet) {
-    for (int i = 0; i < static_cast<int>(estudiantes.size()); ++i) {
+int buscarEstudiante(string carnet) {
+    for (int i = 0; i < estudiantes.size(); ++i) {
         if (estudiantes[i].carnet == carnet) {
             return i;
         }
@@ -64,8 +66,8 @@ int buscarEstudiante(const string& carnet) {
     return -1;
 }
 
-int buscarPrestamo(const string& carnet, const string& codigoLibro) {
-    for (int i = 0; i < static_cast<int>(prestamos.size()); ++i) {
+int buscarPrestamo(string carnet, string codigoLibro) {
+    for (int i = 0; i < prestamos.size(); ++i) {
         if (prestamos[i].carnet == carnet && prestamos[i].codigoLibro == codigoLibro) {
             return i;
         }
@@ -87,44 +89,19 @@ int main() {
         cin.ignore(1000, '\n');
 
         switch (opcion) {
-            case 1:
-                registrarLibro();
-                break;
-            case 2:
-                registrarEstudiante();
-                break;
-            case 3:
-                consultarLibros();
-                break;
-            case 4:
-                consultarEstudiantes();
-                break;
-            case 5:
-                modificarLibro();
-                break;
-            case 6:
-                eliminarLibro();
-                break;
-            case 7:
-                modificarEstudiante();
-                break;
-            case 8:
-                eliminarEstudiante();
-                break;
-            case 9:
-                realizarPrestamo();
-                break;
-            case 10:
-                devolverLibro();
-                break;
-            case 11:
-                agregarStock();
-                break;
-            case 12:
-                cout << "\n[INFO] Saliendo del sistema...\n";
-                break;
-            default:
-                cout << "\n[ERROR] Opción no válida.\n";
+            case 1: registrarLibro(); break;
+            case 2: registrarEstudiante(); break;
+            case 3: consultarLibros(); break;
+            case 4: consultarEstudiantes(); break;
+            case 5: modificarLibro(); break;
+            case 6: eliminarLibro(); break;
+            case 7: modificarEstudiante(); break;
+            case 8: eliminarEstudiante(); break;
+            case 9: realizarPrestamo(); break;
+            case 10: devolverLibro(); break;
+            case 11: agregarStock(); break;
+            case 12: cout << "\n[INFO] Saliendo del sistema...\n"; break;
+            default: cout << "\n[ERROR] Opción no válida.\n";
         }
     } while (opcion != 12);
     return 0;
@@ -152,7 +129,6 @@ void mostrarMenu() {
 void registrarLibro() {
     cout << "\n=== REGISTRO DE NUEVO LIBRO ===\n";
     Libro nuevoLibro;
-    bool codigoValido = false;
 
     do {
         cout << "Ingrese el código del libro: ";
@@ -162,10 +138,8 @@ void registrarLibro() {
             cout << "[ERROR] El código no puede estar vacío.\n";
         } else if (buscarLibro(nuevoLibro.codigo) != -1) {
             cout << "[ERROR] El código del libro ya está registrado (repetido).\n";
-        } else {
-            codigoValido = true;
         }
-    } while (!codigoValido);
+    } while (nuevoLibro.codigo.empty() || buscarLibro(nuevoLibro.codigo) != -1);
 
     do {
         cout << "Ingrese el título: ";
@@ -285,7 +259,7 @@ void consultarLibros() {
     if (!libros.empty()) {
         cout << "\n=== CONSULTA DE LIBROS REGISTRADOS ===\n";
         cout << "----------------------------------------\n";
-        for (int i = 0; i < static_cast<int>(libros.size()); ++i) {
+        for (int i = 0; i < libros.size(); ++i) {
             cout << "[Libro #" << (i + 1) << "]\n";
             cout << "Código:     " << libros[i].codigo << "\n";
             cout << "Título:     " << libros[i].titulo << "\n";
@@ -304,7 +278,7 @@ void consultarEstudiantes() {
     if (!estudiantes.empty()) {
         cout << "\n=== CONSULTA DE ESTUDIANTES REGISTRADOS ===\n";
         cout << "------------------------------------------\n";
-        for (int i = 0; i < static_cast<int>(estudiantes.size()); ++i) {
+        for (int i = 0; i < estudiantes.size(); ++i) {
             cout << "[Estudiante #" << (i + 1) << "]\n";
             cout << "Nombres:    " << estudiantes[i].nombre << "\n";
             cout << "Apellidos:  " << estudiantes[i].apellidos << "\n";
